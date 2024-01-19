@@ -10,20 +10,29 @@ import './App.css'
 
 
 
-const events = [
+const events1 = [
   {
     title  : 'event1',
+    description: 'description for All Day Event 1',
     start  : '2024-01-01'
   },
   {
     title  : 'event2',
+    description: 'description for All Day Event 2',
     start  : '2024-01-05',
     end    : '2024-01-07'
   },
   {
     title  : 'event3',
     start  : '2024-01-09T12:30:00',
+    description: 'description for All Day Event 3',
     allDay : false // will make the time show
+  },
+  {
+    groupId: 'blueEvents', // recurrent events in this group move together
+    daysOfWeek: [ '4' ],
+    startTime: '10:45:00',
+    endTime: '12:45:00'
   },
   
 ]
@@ -85,7 +94,7 @@ function App() {
         plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin, listPlugin, multiMonthPlugin]}
         initialView='dayGridMonth'
         weekends={true}
-        events={events}
+        events={events1}
         // eventContent={renderEventContent}
         eventContent={(info) => <EventItem info={info} />}
         editable={true}
@@ -105,6 +114,8 @@ function App() {
         droppable={true}
         dateClick={clickDates}
         select={handleSelect}
+        eventClick={eventClick}
+        //eventDidMount={eventToolTip}
       />
       </div>
 
@@ -148,4 +159,20 @@ function clickDates(info) {
   )
 }
 
+function eventToolTip(info) {
+  var tooltip = new Tooltip(info.el, {
+    title: info.event.extendedProps.description,
+    placement: 'top',
+    trigger: 'hover',
+    container: 'body'
+  });
+}
+
+function eventClick(info) {
+  alert('Event: ' + info.event.title);
+  alert('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
+  alert('View: ' + info.view.type);
+
+  info.el.style.borderColor = 'red';
+}
 
