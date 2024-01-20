@@ -6,9 +6,19 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import listPlugin from '@fullcalendar/list';
 import multiMonthPlugin from '@fullcalendar/multimonth'
 import { v4 as uuid } from "uuid";
+import Modal from 'react-modal';
 import './App.css'
 
+Modal.setAppElement('#root');
 
+const openModal = (info, setClickedEvent, setIsOpen) => {
+  setClickedEvent(info);
+  setIsOpen(true);
+};
+
+const closeModal = (setIsOpen) => {
+  setIsOpen(false);
+};
 
 const events1 = [
   {
@@ -20,7 +30,16 @@ const events1 = [
     title  : 'event2',
     description: 'description for All Day Event 2',
     start  : '2024-01-05',
-    end    : '2024-01-07'
+    end    : '2024-01-07',
+    extendedProps : [
+      {
+        user : 'damith', 
+        responseStatus : 'accepted',
+    },
+    {
+      user : 'rashmi', 
+      responseStatus : 'rejected',
+    }]
   },
   {
     title  : 'event3',
@@ -63,6 +82,8 @@ function App() {
   }, []);
 
   const [events, setEvents] = useState([]);
+  const [modalIsOpen, setIsOpen] = useState(false);
+  const [clickedEvent, setClickedEvent] = useState(null);
 
   const handleSelect = (info) => {
     const { start, end } = info;
@@ -95,8 +116,8 @@ function App() {
         initialView='dayGridMonth'
         weekends={true}
         events={events1}
-        // eventContent={renderEventContent}
-        eventContent={(info) => <EventItem info={info} />}
+        eventContent={renderEventContent}
+        // eventContent={(info) => <EventItem info={info} />}
         editable={true}
         selectable={true}
         selectMirror={true}
@@ -114,7 +135,7 @@ function App() {
         droppable={true}
         dateClick={clickDates}
         select={handleSelect}
-        eventClick={eventClick}
+        eventClick={(info) => openModal(info, setClickedEvent, setIsOpen)}
         //eventDidMount={eventToolTip}
       />
       </div>
@@ -134,6 +155,19 @@ function App() {
           <label htmlFor='drop-remove'>remove after drop</label>
         </p>
       </div>
+
+        <div>
+        <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={() => closeModal(setIsOpen)}
+        contentLabel="Event Details"
+      >
+        <h2>{clickedEvent?.event?.title}</h2>
+        <h2>{clickedEvent?.event?.id}</h2>
+        <button onClick={() => closeModal(setIsOpen)}>Close</button>
+      </Modal>     
+        </div>
+
     </div>
     </div>
   )
