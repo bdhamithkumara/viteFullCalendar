@@ -1,12 +1,12 @@
-import { useState , useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid'
 import listPlugin from '@fullcalendar/list';
 import multiMonthPlugin from '@fullcalendar/multimonth'
-import { v4 as uuid } from "uuid";
 import Modal from 'react-modal';
+import EventModal from './components/model/EventModal';
 import './App.css'
 
 Modal.setAppElement('#root');
@@ -22,42 +22,53 @@ const closeModal = (setIsOpen) => {
 
 const events1 = [
   {
-    title  : 'event1',
+    title: 'event1',
     description: 'description for All Day Event 1',
-    start  : '2024-01-01'
+    start: '2024-01-01'
   },
   {
-    title  : 'event2',
+    title: 'event2',
     description: 'description for All Day Event 2',
-    start  : '2024-01-05',
-    end    : '2024-01-07',
-    extendedProps : [
+    start: '2024-01-05',
+    end: '2024-01-07',
+    extendedProps: [
       {
-        user : 'damith', 
-        responseStatus : 'accepted',
-    },
-    {
-      user : 'rashmi', 
-      responseStatus : 'rejected',
-    }]
+        user: 'damith',
+        responseStatus: 'accepted',
+      },
+      {
+        user: 'rashmi',
+        responseStatus: 'rejected',
+      }]
   },
   {
-    title  : 'event3',
-    start  : '2024-01-09T12:30:00',
+    title: 'event3',
+    start: '2024-01-09T12:30:00',
     description: 'description for All Day Event 3',
-    allDay : false // will make the time show
+    allDay: false // will make the time show
   },
-  {
-    groupId: 'blueEvents', // recurrent events in this group move together
-    daysOfWeek: [ '4' ],
-    startTime: '10:45:00',
-    endTime: '12:45:00'
-  },
-  
+
+  //{
+  //groupId: 'blueEvents', // recurrent events in this group move together
+  //daysOfWeek: [ '4' ],
+  //startTime: '10:45:00',
+  //endTime: '12:45:00'
+  //},
+
 ]
 
 
 function App() {
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   const EventItem = ({ info }) => {
     const { event } = info;
@@ -69,106 +80,94 @@ function App() {
   };
 
 
-  useEffect(() => {
-    const containerEl = document.querySelector("#events");
-    new Draggable(containerEl, {
-      itemSelector: ".event",
-      eventData: (eventEl) => {
-        return {
-          title: eventEl.innerText
-        };
-      }
-    });
-  }, []);
+  // useEffect(() => {
+  //   const containerEl = document.querySelector("#events");
+  //   new Draggable(containerEl, {
+  //     itemSelector: ".event",
+  //     eventData: (eventEl) => {
+  //       return {
+  //         title: eventEl.innerText
+  //       };
+  //     }
+  //   });
+  // }, []);
 
   const [events, setEvents] = useState([]);
+  const [newEvents , setyNewEvents] = useState([]);
   const [modalIsOpen, setIsOpen] = useState(false);
   const [clickedEvent, setClickedEvent] = useState(null);
 
-  const handleSelect = (info) => {
-    const { start, end } = info;
-    const eventNamePrompt = prompt("Enter, event name");
-    if (eventNamePrompt) {
-      setEvents([
-        ...events,
-        {
-          start,
-          end,
-          title: eventNamePrompt,
-          id: uuid()
-        }
-      ]);
-    }
+
+
+  const handleSelect = () => {
+    setIsModalOpen(true);
   };
 
 
-  console.log(events)
+  useEffect(()=>{
+    setyNewEvents(events)
+    console.log(newEvents)
+  },[events])
+
+
 
   return (
     <div>
       <h1>Demo App</h1>
-      
 
-    <div className='flex'>
-      <div className='w-[80%]'>
-      <FullCalendar
-        plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin, listPlugin, multiMonthPlugin]}
-        initialView='dayGridMonth'
-        weekends={true}
-        events={events1}
-        eventContent={renderEventContent}
-        // eventContent={(info) => <EventItem info={info} />}
-        editable={true}
-        selectable={true}
-        selectMirror={true}
-        dayMaxEvents={true}
-        height={550}
-        headerToolbar={{
-          left: 'prev,next, today',
-          center: 'title',
-          right: 'timeGridWeek,timeGridDay,dayGridMonth,listWeek,multiMonthYear'
-        }}
-        multiMonthMaxColumns={2}
-        navLinks={true}
-        weekNumbers={true}
-        nowIndicator={true}
-        droppable={true}
-        dateClick={clickDates}
-        select={handleSelect}
-        eventClick={(info) => openModal(info, setClickedEvent, setIsOpen)}
-        //eventDidMount={eventToolTip}
-      />
-      </div>
 
-      <div id='events' className='w-fit'>
-        <p>
-          <strong>Draggable Events</strong>
-        </p>
-
-        <div className='fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event'>
-          <div className='event cursor-pointer'>My Event 1</div>
+      <div className='flex'>
+        <div className='w-[80%]'>
+          <FullCalendar
+            plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin, listPlugin, multiMonthPlugin]}
+            initialView='dayGridMonth'
+            weekends={true}
+            events={newEvents}
+            eventContent={renderEventContent}
+            // eventContent={(info) => <EventItem info={info} />}
+            editable={true}
+            selectable={true}
+            selectMirror={true}
+            dayMaxEvents={true}
+            height={550}
+            headerToolbar={{
+              left: 'prev,next, today',
+              center: 'title',
+              right: 'timeGridWeek,timeGridDay,dayGridMonth,listWeek,multiMonthYear'
+            }}
+            multiMonthMaxColumns={2}
+            navLinks={true}
+            weekNumbers={true}
+            nowIndicator={true}
+            droppable={true}
+            dateClick={clickDates}
+            select={handleSelect}
+            eventClick={(info) => openModal(info, setClickedEvent, setIsOpen)}
+          //eventDidMount={eventToolTip}
+          />
         </div>
 
+        {/*} <div id='events' className='w-fit'>
+        //   <p>
+        //     <strong>Draggable Events</strong>
+        //   </p>
 
-        <p>
-          <input type='checkbox' id='drop-remove' />
-          <label htmlFor='drop-remove'>remove after drop</label>
-        </p>
-      </div>
+        //   <div className='fc-event fc-h-event fc-daygrid-event fc-daygrid-block-event'>
+        //     <div className='event cursor-pointer'>My Event 1</div>
+        //   </div>
+
+
+        //   <p>
+        //     <input type='checkbox' id='drop-remove' />
+        //     <label htmlFor='drop-remove'>remove after drop</label>
+        //   </p>
+          </div> */}
 
         <div>
-        <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={() => closeModal(setIsOpen)}
-        contentLabel="Event Details"
-      >
-        <h2>{clickedEvent?.event?.title}</h2>
-        <h2>{clickedEvent?.event?.id}</h2>
-        <button onClick={() => closeModal(setIsOpen)}>Close</button>
-      </Modal>     
+          <EventModal isOpen={isModalOpen} closeModal={closeModal} setEvents={setEvents} events={events}/>
         </div>
 
-    </div>
+      </div>
     </div>
   )
 }
