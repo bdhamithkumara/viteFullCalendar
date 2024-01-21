@@ -19,6 +19,9 @@ const EventModal = ({ isOpen, closeModal, setEvents, events}) => {
   const [eventName, setEventName] = useState('');
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate]= useState('');
+  const [eextendedProps, setExtendedProps] = useState([]);
+  const [user, setUser] = useState('');
+  const [responseStatus, setResponseStatus] = useState('');
 
   // const handleInputChange = (e) => {
   //   setEventName(e.target.value);
@@ -27,6 +30,13 @@ const EventModal = ({ isOpen, closeModal, setEvents, events}) => {
 
 
   const handleSave = () => {
+
+    const newExtendedProp = {
+      user,
+      responseStatus,
+    };
+
+    setExtendedProps([...eextendedProps, newExtendedProp]);
 
     //const { start, end } = info;
     if (eventName) {
@@ -37,11 +47,7 @@ const EventModal = ({ isOpen, closeModal, setEvents, events}) => {
           end: endDate,
           title: eventName,
           description : 'test',
-          extendedProps : [
-            {
-              
-            }
-          ],
+          extendedProps : newExtendedProp,
           id: uuid()
         }
       ]);
@@ -49,8 +55,12 @@ const EventModal = ({ isOpen, closeModal, setEvents, events}) => {
     }
     //onSave(eventName);
     setEventName('');
-    setStartDate('')
-    setEndDate('')
+    setStartDate('');
+    setEndDate('');
+    setExtendedProps([]);
+    setUser('');
+    setResponseStatus('');
+
   };
 
   return (
@@ -165,6 +175,7 @@ const EventModal = ({ isOpen, closeModal, setEvents, events}) => {
             placeholder="Invite individual participants or your groups"
           />
         </div>
+
         <div className="flex items-center space-x-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -190,6 +201,59 @@ const EventModal = ({ isOpen, closeModal, setEvents, events}) => {
             placeholder="Location"
           />
         </div>
+
+        <div className="flex items-center space-x-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className=""
+        >
+          <line x1="2" x2="5" y1="12" y2="12"></line>
+          <line x1="19" x2="22" y1="12" y2="12"></line>
+          <line x1="12" x2="12" y1="2" y2="5"></line>
+          <line x1="12" x2="12" y1="19" y2="22"></line>
+          <circle cx="12" cy="12" r="7"></circle>
+        </svg>
+        <input
+          type="text"
+          className="flex h-10 border border-input text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-[#333] rounded-md py-2 px-3 w-full"
+          placeholder=" User" value={user} onChange={(e) => setUser(e.target.value)}
+        />
+      </div>
+
+
+      <div className="flex items-center space-x-2">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className=""
+      >
+        <line x1="2" x2="5" y1="12" y2="12"></line>
+        <line x1="19" x2="22" y1="12" y2="12"></line>
+        <line x1="12" x2="12" y1="2" y2="5"></line>
+        <line x1="12" x2="12" y1="19" y2="22"></line>
+        <circle cx="12" cy="12" r="7"></circle>
+      </svg>
+      <input
+        type="text"
+        className="flex h-10 border border-input text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-[#333] rounded-md py-2 px-3 w-full"
+        placeholder="Response Status" value={responseStatus} onChange={(e) => setResponseStatus(e.target.value)}
+      />
+    </div>
        
       </div>
       <div className="flex space-x-2 mt-4">
