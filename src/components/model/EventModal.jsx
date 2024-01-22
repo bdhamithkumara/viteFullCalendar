@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 import { v4 as uuid } from "uuid";
+import OpenChatModal from './OpenChatModal';
 
 const customStyles = {
   content: {
@@ -15,7 +16,7 @@ const customStyles = {
 
 Modal.setAppElement('#root');
 
-const EventModal = ({ isOpen, closeModal, setEvents, events}) => {
+const EventModal = ({ isOpen, closeModal, setEvents, events ,setSendToDatabase}) => {
   const [eventName, setEventName] = useState('');
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate]= useState('');
@@ -30,10 +31,11 @@ const EventModal = ({ isOpen, closeModal, setEvents, events}) => {
 
 
   const handleSave = () => {
-
+    setSendToDatabase(true)
     const newExtendedProp = {
       user,
-      responseStatus,
+      responseStatus : 'pending',
+      type : 'physical'
     };
 
     setExtendedProps([...eextendedProps, newExtendedProp]);
@@ -52,6 +54,7 @@ const EventModal = ({ isOpen, closeModal, setEvents, events}) => {
         }
       ]);
       closeModal();
+      setSendToDatabase(false)
     }
     //onSave(eventName);
     setEventName('');
@@ -169,11 +172,7 @@ const EventModal = ({ isOpen, closeModal, setEvents, events}) => {
             <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
           </svg>
-          <input
-            type="text"
-            className="flex h-10 border border-input text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-[#333] rounded-md py-2 px-3 w-full"
-            placeholder="Invite individual participants or your groups"
-          />
+          <OpenChatModal setUser={setUser}/>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -202,31 +201,7 @@ const EventModal = ({ isOpen, closeModal, setEvents, events}) => {
           />
         </div>
 
-        <div className="flex items-center space-x-2">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className=""
-        >
-          <line x1="2" x2="5" y1="12" y2="12"></line>
-          <line x1="19" x2="22" y1="12" y2="12"></line>
-          <line x1="12" x2="12" y1="2" y2="5"></line>
-          <line x1="12" x2="12" y1="19" y2="22"></line>
-          <circle cx="12" cy="12" r="7"></circle>
-        </svg>
-        <input
-          type="text"
-          className="flex h-10 border border-input text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-[#333] rounded-md py-2 px-3 w-full"
-          placeholder=" User" value={user} onChange={(e) => setUser(e.target.value)}
-        />
-      </div>
+
 
 
       <div className="flex items-center space-x-2">

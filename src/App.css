@@ -40,3 +40,40 @@
 .read-the-docs {
   color: #888;
 }
+
+
+.quill {
+  position: relative;
+}
+
+.textarea-emoji-control {
+  opacity: 0;
+  /* position: absolute; */
+  /* right: 86.5%; */
+  /* top: 125%; */
+  margin-right: 522px;
+  margin-top: 55px;
+  opacity: 1!important;
+  position: absolute;
+
+  margin-top: 48px;
+  /* top: 2px; */
+  /* margin-right: 522px;
+  margin-top: 55px; */
+  /* transform: translate(35px, -6px); */
+}
+
+.ql-editor {
+  padding: 0!important;
+}
+
+.ql-toolbar.ql-snow {
+  padding: 0!important;
+  border: none!important;
+}
+
+.ql-snow.ql-toolbar button {
+  padding: 0;
+  height: 18px;
+  width: 18px;
+}

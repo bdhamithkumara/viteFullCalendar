@@ -8,6 +8,9 @@ import multiMonthPlugin from '@fullcalendar/multimonth'
 import Modal from 'react-modal';
 import EventModal from './components/model/EventModal';
 import './App.css'
+import OpenChatModal from './components/model/OpenChatModal';
+import { supabase } from './supabaseClient';
+
 
 Modal.setAppElement('#root');
 
@@ -61,6 +64,7 @@ const events1 = [
 function App() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const user = JSON.parse(window.localStorage.getItem('user'))
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -93,23 +97,77 @@ function App() {
   // }, []);
 
   const [events, setEvents] = useState([]);
-  const [newEvents , setyNewEvents] = useState([]);
+  const [newEvents, setyNewEvents] = useState([]);
   const [modalIsOpen, setIsOpen] = useState(false);
   const [clickedEvent, setClickedEvent] = useState(null);
 
-
+  const [sendToDatabase, setSendToDatabase] = useState(false)
 
   const handleSelect = () => {
     setIsModalOpen(true);
   };
 
 
-  useEffect(()=>{
+  useEffect(() => {
     setyNewEvents(events)
+    //getCalenderDataFromDatabase()
+    saveToCalenderData()
     console.log(newEvents)
-  },[events])
+  }, [events])
 
 
+  // const getCalenderDataFromDatabase = async () => {
+
+  //   try {
+  //     let { data , error } = await supabase
+  //       .from('calender')
+  //       .select('content')
+  //       .eq( 'user_id' , user.id)
+
+
+
+  //     if (!error) {
+  //       console.log('get the calender data from supabase:', data)
+  //       setyNewEvents(data.content)
+  //     } else {
+  //       console.error('Error get the calender data from supabase:', error)
+  //     }
+  //   } catch (error) {
+  //     console.error('Error get the calender data from supabase:', error)
+  //   }
+  // }
+
+
+  const saveToCalenderData = async () => {
+
+    //if(sendToDatabase){
+    try {
+      const { data, error } = await supabase
+        .from('calender')
+        .insert([
+          {
+            user_id: user.id,
+            content: events,
+          },
+        ])
+        .select()
+
+      if (!error) {
+        console.log('calender data added to supabase:', data)
+        
+      } else {
+        console.error('calender data added to supabase:', error)
+      }
+    } catch (error) {
+      console.error('Error calender data added to supabase:', error)
+    }
+    // }
+  }
+
+  // useEffect(() => {
+  //   console.log(user.id)
+  //   saveToCalenderData()
+  // }, [])
 
   return (
     <div>
@@ -164,10 +222,11 @@ function App() {
           </div> */}
 
         <div>
-          <EventModal isOpen={isModalOpen} closeModal={closeModal} setEvents={setEvents} events={events}/>
+          <EventModal isOpen={isModalOpen} closeModal={closeModal} setEvents={setEvents} events={events} setSendToDatabase={setSendToDatabase} />
         </div>
 
       </div>
+
     </div>
   )
 }
