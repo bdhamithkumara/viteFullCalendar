@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import { v4 as uuid } from "uuid";
 import OpenChatModal from './OpenChatModal';
@@ -16,19 +16,24 @@ const customStyles = {
 
 Modal.setAppElement('#root');
 
-const EventModal = ({ isOpen, closeModal, setEvents, events ,setSendToDatabase}) => {
+const EventModal = ({ isOpen, closeModal, setEvents, events ,setSendToDatabase, clickedDate}) => {
   const [eventName, setEventName] = useState('');
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate]= useState('');
   const [eextendedProps, setExtendedProps] = useState([]);
-  const [user, setUser] = useState('');
+  const [user, setUser] = useState([]);
   const [responseStatus, setResponseStatus] = useState('');
 
   // const handleInputChange = (e) => {
   //   setEventName(e.target.value);
   // };
 
+  console.log("clickedDate from event model " +clickedDate)
 
+  useEffect(()=>{
+    setStartDate(clickedDate)
+    setEndDate(clickedDate)
+  },[clickedDate])
 
   const handleSave = () => {
     setSendToDatabase(true)
@@ -39,11 +44,10 @@ const EventModal = ({ isOpen, closeModal, setEvents, events ,setSendToDatabase})
     };
 
     setExtendedProps([...eextendedProps, newExtendedProp]);
-
+    setSendToDatabase(true)
     //const { start, end } = info;
     if (eventName) {
       setEvents([
-        ...events,
         {
           start: startDate,
           end: endDate,
@@ -54,7 +58,7 @@ const EventModal = ({ isOpen, closeModal, setEvents, events ,setSendToDatabase})
         }
       ]);
       closeModal();
-      setSendToDatabase(false)
+     
     }
     //onSave(eventName);
     setEventName('');

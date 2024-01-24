@@ -10,18 +10,19 @@ import EventModal from './components/model/EventModal';
 import './App.css'
 import OpenChatModal from './components/model/OpenChatModal';
 import { supabase } from './supabaseClient';
-
+import { Button, notification, Space } from 'antd';
+import EventModelForView from './components/model/EventModelForView';
 
 Modal.setAppElement('#root');
 
-const openModal = (info, setClickedEvent, setIsOpen) => {
-  setClickedEvent(info);
-  setIsOpen(true);
-};
+// const openModal = (info, setClickedEvent, setIsOpen) => {
+//   setClickedEvent(info);
+//   setIsOpen(true);
+// };
 
-const closeModal = (setIsOpen) => {
-  setIsOpen(false);
-};
+// const closeModal = (setIsOpen) => {
+//   setIsOpen(false);
+// };
 
 const events1 = [
   {
@@ -64,24 +65,29 @@ const events1 = [
 function App() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenForDetail, setIsModalOpenForDetail] = useState(false);
   const user = JSON.parse(window.localStorage.getItem('user'))
 
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
+  // const openModal = () => {
+  //   setIsModalOpen(true);
+  // };
 
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
-  const EventItem = ({ info }) => {
-    const { event } = info;
-    return (
-      <div>
-        <p>{event.title}</p>
-      </div>
-    );
+  const closeModalForDetail = () => {
+    setIsModalOpenForDetail(false);
   };
+
+  // const EventItem = ({ info }) => {
+  //   const { event } = info;
+  //   return (
+  //     <div>
+  //       <p>{event.title}</p>
+  //     </div>
+  //   );
+  // };
 
 
   // useEffect(() => {
@@ -98,8 +104,10 @@ function App() {
 
   const [events, setEvents] = useState([]);
   const [newEvents, setyNewEvents] = useState([]);
+  const [clickEventData, setClickEventData] = useState([])
   const [modalIsOpen, setIsOpen] = useState(false);
   const [clickedEvent, setClickedEvent] = useState(null);
+  const [clickedDate, setClickedDate] = useState('')
 
   const [sendToDatabase, setSendToDatabase] = useState(false)
 
@@ -108,71 +116,169 @@ function App() {
   };
 
 
+  const [clickedTitle , setClickedTitle] = useState('')
+  const [clickedDescription, setClickedDescription] = useState('')
+  const [clickedInviteName, setClickedInviteName ] = useState('')
+  const [clickedEventDateStart, setClickedEventDateStart]= useState('')
+
+  const eventClick = (info) => {
+    setClickedTitle(info.event.title)
+    setClickedDescription(info.event.extendedProps.description)
+    setClickedInviteName(info.event.extendedProps[0].user.userName)
+    setClickedEventDateStart(info.event.start)
+    setIsModalOpenForDetail(true)
+  }
+
+  // function eventClick(info) {
+  //   console.log("title : " + info.event.title) 
+  //   console.log("description : " + info.event.extendedProps.description)
+  //   console.log("invite name : " + info.event.extendedProps[0].user.userName)
+  //   console.log("date : " + info.event.start)
+  // }
+  
+  const clickDates = (info) => {
+    setClickedDate(info.dateStr)
+  }
+
   useEffect(() => {
     setyNewEvents(events)
-    //getCalenderDataFromDatabase()
+    getCalenderDataFromDatabase()
     saveToCalenderData()
     console.log(newEvents)
   }, [events])
 
 
-  // const getCalenderDataFromDatabase = async () => {
+  const getCalenderDataFromDatabase = async () => {
 
-  //   try {
-  //     let { data , error } = await supabase
-  //       .from('calender')
-  //       .select('content')
-  //       .eq( 'user_id' , user.id)
+    try {
+      let { data, error } = await supabase
+        .from('calender')
+        .select('content')
+        .eq('user_id', user.id)
+
+      if (!error) {
+        console.log('get the calender data from supabase:', data)
+
+        const transformedData = data.map(item => {
+          const event = item.content[0];
+          return {
+            title: event.title,
+            id : event.id,
+            description: event.description,
+            start: event.start,
+            end: event.end,
+            extendedProps: [
+              {
+                user: event.extendedProps.user,
+                responseStatus: event.extendedProps.responseStatus,
+              }
+            ]
+          };
+        });
+
+        setyNewEvents(transformedData)
+
+      } else {
+        console.error('Error get the calender data from supabase:', error)
+      }
+    } catch (error) {
+      console.error('Error get the calender data from supabase:', error)
+    }
+  }
 
 
-
-  //     if (!error) {
-  //       console.log('get the calender data from supabase:', data)
-  //       setyNewEvents(data.content)
-  //     } else {
-  //       console.error('Error get the calender data from supabase:', error)
-  //     }
-  //   } catch (error) {
-  //     console.error('Error get the calender data from supabase:', error)
-  //   }
-  // }
-
+  const [api, contextHolder] = notification.useNotification();
+  const openNotification = () => {
+    const key = `open${Date.now()}`;
+    const btn = (
+      <Space>
+        <Button type="link" size="small" onClick={() => api.destroy()}>
+          Destroy All
+        </Button>
+        <Button type="primary" size="small" onClick={() => api.destroy(key)}>
+          Confirm
+        </Button>
+      </Space>
+    );
+    api.open({
+      message: 'Notification Title',
+      description:
+        'A function will be be called after the notification is closed (automatically after the "duration" time of manually).',
+      btn,
+      key,
+      onClose: close,
+    });
+  }
 
   const saveToCalenderData = async () => {
 
-    //if(sendToDatabase){
+    if (sendToDatabase) {
+      try {
+        const { data, error } = await supabase
+          .from('calender')
+          .insert([
+            {
+              user_id: user.id,
+              content: events,
+            },
+          ])
+          .select()
+
+        if (!error) {
+          console.log('calender data added to supabase:', data[0].content)
+          insertForNortification(data[0])
+          //openNotification()
+
+        } else {
+          console.error('calender data added to supabase:', error)
+        }
+      } catch (error) {
+        console.error('Error calender data added to supabase:', error)
+      }
+      setSendToDatabase(false)
+    }
+  }
+
+  const insertForNortification = async (catchData) => {
+
+    console.log(catchData)
+
+    const contentDetails = {
+      title: catchData.content[0].title,
+      start: catchData.content[0].start,
+      end: catchData.content[0].end,
+      description : catchData.content[0].description,
+    };
+
+    console.log(contentDetails)
+
     try {
       const { data, error } = await supabase
-        .from('calender')
-        .insert([
-          {
-            user_id: user.id,
-            content: events,
-          },
-        ])
+        .from('calender_nortification')
+        .insert([{
+           user_id: catchData.content[0].extendedProps.user.userId,
+           content: contentDetails ,
+        }])
         .select()
 
       if (!error) {
-        console.log('calender data added to supabase:', data)
-        
+        console.log('calender nortification data added to supabase:', data)
       } else {
-        console.error('calender data added to supabase:', error)
+        console.error('calender nortification data  not added to supabase:', error)
       }
     } catch (error) {
-      console.error('Error calender data added to supabase:', error)
+      console.log("nortification table insert error - " + error)
     }
-    // }
   }
 
-  // useEffect(() => {
-  //   console.log(user.id)
-  //   saveToCalenderData()
-  // }, [])
+  useEffect(() => {
+    getCalenderDataFromDatabase()
+  }, [])
 
   return (
     <div>
       <h1>Demo App</h1>
-
+      {contextHolder}
 
       <div className='flex'>
         <div className='w-[80%]'>
@@ -200,7 +306,8 @@ function App() {
             droppable={true}
             dateClick={clickDates}
             select={handleSelect}
-            eventClick={(info) => openModal(info, setClickedEvent, setIsOpen)}
+            eventClick={eventClick}
+            
           //eventDidMount={eventToolTip}
           />
         </div>
@@ -222,7 +329,18 @@ function App() {
           </div> */}
 
         <div>
-          <EventModal isOpen={isModalOpen} closeModal={closeModal} setEvents={setEvents} events={events} setSendToDatabase={setSendToDatabase} />
+          <EventModal isOpen={isModalOpen} closeModal={closeModal} setEvents={setEvents} events={events} setSendToDatabase={setSendToDatabase} clickedDate={clickedDate}/>
+        </div>
+        <div>
+          <EventModelForView 
+            isModalOpenForDetail={isModalOpenForDetail} 
+            closeModalForDetail={closeModalForDetail} 
+            clickEventData={clickEventData} 
+            clickedTitle={clickedTitle}
+            clickedDescription={clickedDescription}
+            clickedInviteName={clickedInviteName}
+            clickedEventDateStart={clickedEventDateStart}
+          />
         </div>
 
       </div>
@@ -243,13 +361,6 @@ function renderEventContent(eventInfo) {
   )
 }
 
-function clickDates(info) {
-  return (
-    <>
-      <b>{console.log('Clicked on: ' + info.dateStr)}</b>
-    </>
-  )
-}
 
 function eventToolTip(info) {
   var tooltip = new Tooltip(info.el, {
@@ -258,13 +369,5 @@ function eventToolTip(info) {
     trigger: 'hover',
     container: 'body'
   });
-}
-
-function eventClick(info) {
-  alert('Event: ' + info.event.title);
-  alert('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
-  alert('View: ' + info.view.type);
-
-  info.el.style.borderColor = 'red';
 }
 

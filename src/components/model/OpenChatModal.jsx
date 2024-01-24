@@ -15,12 +15,19 @@ export default function OpenChatModal({setUser}) {
     const [showUserList, setShowUserList] = useState(false)
 
 
+
     const handleSelectUser = (currUser) => {
-        console.log(currUser)
+
+        const userDetails = {
+            userId : currUser.id,
+            userName : currUser.raw_user_meta_data.name
+        };
+
+        console.log(currUser.id)
         setSelectedUser(currUser)
         setSearchUser(currUser.raw_user_meta_data.name)
         setShowUserList(false)
-        setUser(currUser)
+        setUser(userDetails)
     }
 
     const handleSearchUsers = async (text) => {
